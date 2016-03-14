@@ -9,6 +9,6 @@
 #import <Foundation/Foundation.h>
 
 @interface BrainCalculator : NSObject
-+ (NSNumber *)calculateFromString:(NSString *)stringForCalculation error:(NSError * __autoreleasing *)error;
+@property (nonatomic, strong) NSMutableArray *numberResultsStack;
 + (NSNumber *)calculateInfix:(NSString *)string;
 @end

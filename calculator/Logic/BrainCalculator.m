@@ -18,24 +18,21 @@ typedef NS_ENUM(NSInteger, BrainCalculatorOperator) {
     BrainCalculatorCloseParen
 };
 
-@interface BrainCalculator ()
-    @property (nonatomic, strong) NSMutableArray *numberResultsStack;
-@end
-
 @implementation BrainCalculator
 
 - (instancetype)init {
     self = [super init];
     if (!self) return nil;
-    
+
     _numberResultsStack = [NSMutableArray new];
     return self;
 }
 
-+ (NSNumber *)calculateFromString:(NSString *)stringForCalculation error:(NSError * __autoreleasing *)error {
-        NSArray *stackify = [stringForCalculation componentsSeparatedByString:@" "];
++ (NSNumber *)calculateInfix:(NSString *)string { //Главная функция
     BrainCalculator *calculator = [BrainCalculator new];
-    return [calculator calculate:stackify error:error];;
+    NSArray *stackify = [[calculator convertInfixToRPN:string] componentsSeparatedByString:@" "];
+    NSLog(@"НОВОЕ %@",[calculator convertInfixToRPN:string]);
+    return [calculator calculate:stackify error:nil];
 }
 
 + (BOOL)isValidInstruction:(NSString *)instruction {
@@ -94,11 +91,11 @@ typedef NS_ENUM(NSInteger, BrainCalculatorOperator) {
     return BrainCalculatorNotOperator;
 }
 
-- (void)performOperator:(BrainCalculatorOperator)operator {
-    float firstNumber = [[self popValue] doubleValue];
-    float previousNumber = [[self popValue] doubleValue];
+- (void)performOperator:(BrainCalculatorOperator)operator { // 5 / 0
+    double firstNumber = [[self popValue] doubleValue];
+    double previousNumber = [[self popValue] doubleValue];
     
-    float result = 0.f;
+    double result = 0.f;
     switch (operator) {
         case BrainCalculatorAddition:
             result = previousNumber + firstNumber;
@@ -116,7 +113,7 @@ typedef NS_ENUM(NSInteger, BrainCalculatorOperator) {
             break;
     }
     
-    NSLog(@"new result %f", result);
+//    NSLog(@"new result %f", result);
     [self pushValue:[NSString stringWithFormat:@"%f", result]];
 }
 
@@ -128,12 +125,6 @@ typedef NS_ENUM(NSInteger, BrainCalculatorOperator) {
     id value = [self.numberResultsStack lastObject];
     [self.numberResultsStack removeLastObject];
     return value;
-}
-
-+ (NSNumber *)calculateInfix:(NSString *)string {
-    BrainCalculator *calculator = [BrainCalculator new];
-    NSArray *stackify = [[calculator convertInfixToRPN:string] componentsSeparatedByString:@" "];
-    return [calculator calculate:stackify error:nil];
 }
 
 - (NSString *)convertInfixToRPN:(NSString *)string {
@@ -170,13 +161,12 @@ typedef NS_ENUM(NSInteger, BrainCalculatorOperator) {
         }
     }];
     
-    while ([operatorStack count] != 0) {
+    while ([operatorStack count]) {
         [numberString appendString:@" "];
         [numberString appendString:[operatorStack lastObject]];
         [operatorStack removeLastObject];
     }
     return numberString;
 }
-
 
 @end
